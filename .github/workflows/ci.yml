@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Lint, build, and check the package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - run: node --test test/*.test.js
+
+      - name: The package must have zero runtime dependencies
+        run: |
+          deps=$(node -p "JSON.stringify(require('./package.json').dependencies || {})")
+          echo "dependencies: $deps"
+          test "$deps" = "{}" || { echo "::error::verified community nodes may not have runtime dependencies"; exit 1; }
+
+      - name: The packed tarball must contain both nodes, the credential and the icons
+        run: |
+          npm pack
+          tar tzf n8n-nodes-mailmint-*.tgz | sort | tee /tmp/files
+          for f in \
+            package/dist/nodes/MailMint/MailMint.node.js \
+            package/dist/nodes/MailMint/MailMint.node.json \
+            package/dist/nodes/MailMint/mailmint.svg \
+            package/dist/nodes/MailMint/mailmint.dark.svg \
+            package/dist/nodes/MailMintTrigger/MailMintTrigger.node.js \
+            package/dist/nodes/MailMintTrigger/MailMintTrigger.node.json \
+            package/dist/nodes/MailMintTrigger/mailmint.svg \
+            package/dist/credentials/MailMintApi.credentials.js \
+            package/dist/credentials/mailmint.svg \
+            package/README.md \
+            package/LICENSE.md ; do
+            grep -qx "$f" /tmp/files || { echo "::error::missing $f from the published package"; exit 1; }
+          done
+
+      - name: The nodes must load and describe themselves
+        run: |
+          node -e "
+            const { MailMint } = require('./dist/nodes/MailMint/MailMint.node.js');
+            const { MailMintTrigger } = require('./dist/nodes/MailMintTrigger/MailMintTrigger.node.js');
+            const node = new MailMint();
+            const d = node.description;
+            if (d.name !== 'mailMint') throw new Error('unexpected node name: ' + d.name);
+            if (d.usableAsTool !== true) throw new Error('the node must be usable as an AI Agent tool');
+            if (!d.subtitle) throw new Error('a verified node needs a subtitle');
+            const ops = (resource) => d.properties
+              .filter((p) => p.name === 'operation' && p.displayOptions.show.resource.includes(resource))
+              .flatMap((p) => p.options.map((o) => o.value));
+            for (const op of ['create', 'delete', 'getAll', 'reparseAll', 'update']) {
+              if (!ops('mailbox').includes(op)) throw new Error('missing mailbox operation: ' + op);
+            }
+            for (const op of ['downloadAttachment', 'get', 'getAll', 'getRaw', 'reparse']) {
+              if (!ops('message').includes(op)) throw new Error('missing message operation: ' + op);
+            }
+            if (!ops('parse').includes('parse')) throw new Error('missing parse operation');
+            // The field pickers reference these by name; a rename that missed one
+            // would only show up as an empty dropdown in the editor.
+            if (typeof node.methods.loadOptions.getMailboxes !== 'function') {
+              throw new Error('the mailbox option loader is missing');
+            }
+            const t = new MailMintTrigger().description;
+            if (t.name !== 'mailMintTrigger') throw new Error('unexpected trigger name: ' + t.name);
+            if (t.polling !== true) throw new Error('the trigger must support polling');
+            console.log('nodes ok:', d.displayName, '|', ops('mailbox').concat(ops('message'), ops('parse')).join(', '));
+          "
+
+      - name: The credential must default to the hosted API
+        run: |
+          node -e "
+            const { MailMintApi } = require('./dist/credentials/MailMintApi.credentials.js');
+            const c = new MailMintApi();
+            const base = c.properties.find((p) => p.name === 'baseUrl');
+            if (base.default !== 'https://mailmint.app.mintapis.com') {
+              throw new Error('the credential must default to the hosted API, got: ' + base.default);
+            }
+            if (!c.test || !c.test.request) throw new Error('the credential must test itself');
+            console.log('credential ok:', base.default);
+          "
