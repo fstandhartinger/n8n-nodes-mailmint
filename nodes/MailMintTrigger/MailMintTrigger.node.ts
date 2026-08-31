@@ -363,6 +363,7 @@ export class MailMintTrigger implements INodeType {
 					delete staticData.endpointId;
 					delete staticData.webhookUrl;
 					delete staticData.mailboxId;
+					delete staticData.webhookSecret;
 					return true;
 				}
 
@@ -391,6 +392,7 @@ export class MailMintTrigger implements INodeType {
 				}
 				delete staticData.webhookUrl;
 				delete staticData.mailboxId;
+				delete staticData.webhookSecret;
 				return true;
 			},
 		},
