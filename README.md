@@ -15,7 +15,8 @@ MailMint is the API behind it.
 > Published on npm as [`n8n-nodes-mailmint`](https://www.npmjs.com/package/n8n-nodes-mailmint),
 > and the API behind it is hosted at **https://mailmint.app.mintapis.com** — sign up there,
 > copy the `mm_live_…` key from the dashboard, and the credential's Base URL default already
-> points at it. You can also point it at a MailMint you run yourself.
+> points at it. A new account starts on the free plan: 300 parsed emails a month, no card.
+> You can also point it at a MailMint you run yourself.
 
 ---
 
@@ -199,7 +200,9 @@ file as real n8n binary data, use **Message → Download Attachment**.
 For mail that should come *to* MailMint rather than through your own IMAP:
 
 1. **MailMint → Mailbox → Create**, give it a name and a schema. The response carries the
-   address, something like `k7m2xq4h9bwz@parse.mailmint.dev`.
+   address, something like `k7m2xq4h9bwz@smooth-operator.online` — that is the inbound
+   domain of the hosted service. A MailMint you run yourself uses whatever its
+   `INBOUND_DOMAIN` is set to.
 2. Point whatever sends the mail at that address.
 3. Add a **MailMint Trigger** to receive the parsed messages.
 
