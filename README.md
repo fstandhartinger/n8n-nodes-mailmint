@@ -12,17 +12,27 @@ MailMint is the API behind it.
 
 > ### Status
 >
-> Published on npm as [`n8n-nodes-mailmint`](https://www.npmjs.com/package/n8n-nodes-mailmint),
-> and the API behind it is hosted at **https://mailmint.app.mintapis.com** — sign up there,
-> copy the `mm_live_…` key from the dashboard, and the credential's Base URL default already
-> points at it. A new account starts on the free plan: 300 parsed emails a month, no card.
+> Published on npm as [`n8n-nodes-mailmint`](https://www.npmjs.com/package/n8n-nodes-mailmint)
+> and verified by n8n, so it installs on n8n Cloud too. The API behind it is hosted at
+> **https://mailmint.app.mintapis.com** — sign up there, copy the `mm_live_…` key from the
+> dashboard, and the credential's Base URL default already points at it. A new account starts on the free plan: 300 parsed emails a month, no card.
 > You can also point it at a MailMint you run yourself.
 
 ---
 
 ## Install
 
-In n8n: **Settings → Community Nodes → Install**, enter `n8n-nodes-mailmint`, confirm.
+> **Installs on n8n Cloud and self-hosted.** The node passed n8n's verification and is
+> published as a verified community node. n8n installs whichever version it has verified,
+> which can trail the newest npm release by a few days.
+>
+> **From the nodes panel (Cloud or self-hosted):** open a workflow → add node → search
+> `MailMint` → pick it under **More from the community** → **Install**. n8n limits that
+> button to the instance owner and admin accounts; everyone else on the instance can use
+> the node once it is installed.
+
+Self-hosted, from the n8n UI: **Settings → Community Nodes → Install**, enter
+`n8n-nodes-mailmint`, confirm.
 
 Self-hosted, from the command line:
 
