@@ -17,6 +17,9 @@ MailMint is the API behind it.
 > **https://mailmint.app.mintapis.com** — sign up there, copy the `mm_live_…` key from the
 > dashboard, and the credential's Base URL default already points at it. A new account starts on the free plan: 300 parsed emails a month, no card.
 > You can also point it at a MailMint you run yourself.
+>
+> The full guide, with screenshots of the node running in a real n8n instance, is at
+> [mailmint.app.mintapis.com/n8n](https://mailmint.app.mintapis.com/n8n).
 
 ---
 
@@ -168,6 +171,10 @@ wins for that row and the message-level one is kept, named, under `_shadowed`.
 `pairedItem` is set on every row, so n8n can still trace all forty items back to the one
 email they came from.
 
+[Parsing invoice emails](https://mailmint.app.mintapis.com/parse-invoice-emails) goes
+through a real invoice email end to end: the schema, the parsed result, and how to check
+its arithmetic before anything reaches the ledger.
+
 ## Confidence, and routing what needs a human
 
 Every field carries a confidence, the source it came from, and the **verbatim evidence** it
@@ -251,6 +258,9 @@ sender or domain, only for one mailbox — and the same **Output**, **Simplify**
 **Route Messages Needing Review Separately** settings as the main node.
 
 ## Operations
+
+The HTTP endpoints behind these, with the plan limits the hosted service enforces, are in the
+[API reference](https://mailmint.app.mintapis.com/docs/reference).
 
 | Resource | Operation | What it does |
 |---|---|---|
